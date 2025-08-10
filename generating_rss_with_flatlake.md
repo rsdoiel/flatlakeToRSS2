@@ -4,19 +4,18 @@ abstract: >
   A show post describing a prototype in Deno+TypeScript for generating RSS 2.0
   feeds from a FlatLake generated JSON API.
 author: R. S. Doiel
-dateCreated: 2025-08-10T00:00:00.000Z
+dateCreated: '2025-08-10'
 dateModified: '2025-08-10'
 keywords:
   - FlatLake
   - JSON API
   - RSS 2.0
-hashTags: []
-atTags:
-  - '@include'
 datePublished: '2025-08-10'
 ---
 
 # Generating RSS with FlatLake
+
+By R. S. Doiel, 2025-08-10
 
 One of the must have features missing from many static websites are RSS feeds.
 Many people produce blogs using CommonMark/Markdown documents with front matter.
@@ -91,7 +90,7 @@ the content of "page-1.json" into an RSS XML feed file.
 
 Here's a TypeScript module I knock together to test out the concept.
 
-~~~
+~~~TypeScript
 /**
  * flatlakeToRSS2.ts translate a FlatLake JSON API document to RSS2 XML.
  *  
@@ -219,7 +218,6 @@ export function generateRSS(feed: RSSFeed): string {
     </channel>
 </rss>`;
 }
-
 ~~~
 
 ## Putting it all together
