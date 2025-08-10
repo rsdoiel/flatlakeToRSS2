@@ -5,8 +5,7 @@ abstract: >
   feeds from a FlatLake generated JSON API.
 author: R. S. Doiel
 dateCreated: 2025-08-10T00:00:00.000Z
-dateModified: 2025-08-10T00:00:00.000Z
-draft: true
+dateModified: '2025-08-10'
 keywords:
   - FlatLake
   - JSON API
@@ -14,6 +13,7 @@ keywords:
 hashTags: []
 atTags:
   - '@include'
+datePublished: '2025-08-10'
 ---
 
 # Generating RSS with FlatLake
