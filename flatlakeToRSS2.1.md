@@ -1,4 +1,4 @@
-%flatlakeToRSS2(1) user manual | version 0.0.1 
+%flatlakeToRSS2(1) user manual | version 0.0.1 93931d6
 % R. S. Doiel
 % 2025-08-10
 

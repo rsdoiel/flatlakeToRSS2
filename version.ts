@@ -2,7 +2,7 @@
 
 export const version: string = '0.0.1',
 releaseDate: string = '2025-08-10',
-releaseHash: string = '',
+releaseHash: string = '93931d6',
 licenseText: string = `
                     GNU AFFERO GENERAL PUBLIC LICENSE
                        Version 3, 19 November 2007
