@@ -1,0 +1,31 @@
+
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+type: software
+title: flatlakeToRSS2
+abstract: "This is a demo of using the FlatLake generated  JSON API to produce an RSS 2.0 feed.
+It's a working proof of concept only.
+
+The Deno+TypeScript program that will convert a FlatLake generated `api/all/page-1.json` file into RSS 2.0 XML."
+authors:
+  - family-names: Doiel
+    given-names: R. S.
+    orcid: https://orcid.org/0000-0003-0900-6903
+    email: rsdoiel@gmail.com
+
+contacts:
+  - family-names: Doiel
+    given-names: R. S. Doiel
+    orcid: https://orcid.org/0000-0003-0900-6903
+    email: rsdoiel@gmail.com
+
+repository-code: "https://github.com/rsdoiel/flatlakeToRSS2"
+version: 0.0.1
+date-released: 2025-08-10
+
+license-url: "https://www.gnu.org/licenses/agpl-3.0.txt"
+keywords:
+  - FlatLake
+  - JSON
+  - RSS
+

@@ -1,0 +1,25 @@
+{
+  "tasks": {
+    "build": "deno task version.ts ; deno compile --allow-read --allow-write --output bin/flatlakeToRSS2 mod.ts",
+    "check": "deno check",
+    "lint": " deno lint",
+    "version.ts": "cmt codemeta.json version.ts",
+    "CITATION.cff": "cmt codemeta.json CITATION.cff",
+    "dist_linux_x86_64": "deno task dist_linux_x86_64_flatlakeToRSS2",
+    "dist_linux_x86_64_flatlakeToRSS2": "deno compile   --allow-read --allow-write --output dist/bin/flatlakeToRSS2 --target x86_64-unknown-linux-gnu mod.ts",
+    "dist_linux_aarch64": "deno task dist_linux_aarch64_flatlakeToRSS2 ",
+    "dist_linux_aarch64_flatlakeToRSS2": "deno compile  --allow-read --allow-write --output dist/bin/flatlakeToRSS2 --target aarch64-unknown-linux-gnu mod.ts",
+    "dist_macos_x86_64": "deno task dist_macos_x86_64_flatlakeToRSS2 ",
+    "dist_macos_x86_64_flatlakeToRSS2": "deno compile   --allow-read --allow-write --output dist/bin/flatlakeToRSS2 --target x86_64-apple-darwin mod.ts",
+    "dist_macos_aarch64": "deno task dist_macos_aarch64_flatlakeToRSS2 ",
+    "dist_macos_aarch64_flatlakeToRSS2": "deno compile  --allow-read --allow-write --output dist/bin/flatlakeToRSS2 --target aarch64-apple-darwin mod.ts",
+    "dist_windows_x86_64": "deno task dist_windows_x86_64_flatlakeToRSS2 ",
+    "dist_windows_x86_64_flatlakeToRSS2": "deno compile --allow-read --allow-write --output dist/bin/flatlakeToRSS2.exe --target x86_64-pc-windows-msvc mod.ts",
+    "dist_windows_aarch64": "deno task dist_windows_aarch64_flatlakeToRSS2 ",
+    "dist_windows_aarch64_flatlakeToRSS2": "deno compile --allow-read --allow-write --output dist/bin/flatlakeToRSS2.exe --target aarch64-pc-windows-msvc mod.ts"
+  },
+  "imports": {
+    "@std/flags": "jsr:@std/flags@^0.224.0",
+    "@std/yaml": "jsr:@std/yaml@^1.0.9"
+  }
+}

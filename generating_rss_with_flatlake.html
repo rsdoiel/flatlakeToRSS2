@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <title>flatlakeToRSS2</title>
+    <link rel="stylesheet" href="/css/site.css">
+</head>
+<body>
+<nav>
+<ul>
+    <li><a href="/">Home</a></li>
+    <li><a href="index.html">README</a></li>
+    <li><a href="LICENSE">LICENSE</a></li>
+    <li><a href="INSTALL.html">INSTALL</a></li>
+    <li><a href="user_manual.html">User Manual</a></li>
+    <li><a href="about.html">About</a></li>
+    <li><a href="search.html">Search</a></li>
+    <li><a href="https://github.com/rsdoiel/flatlakeToRSS2">GitHub</a></li>
+</ul>
+</nav>
+<section>
+<h1 id="generating-rss-with-flatlake">Generating RSS with FlatLake</h1>
+<p>One of the must have features missing from many static websites are
+RSS feeds. Many people produce blogs using CommonMark/Markdown documents
+with front matter. <a href="https://flatlake.app"
+title="an open source tool from Cloud Cannon">FlatLake</a> produces a
+JSON API from front matter. The API makes it easy to generate various
+types of feeds. All that is needed is something to translate the JSON
+API documents to the feed format you want. In this post I will show a
+proof of concept using Deno+TypeScript to process the Flatlake generate
+JSON API into an RSS feed.</p>
+<h2 id="requirements-for-your-site">Requirements for your site</h2>
+<p>You need <a href="https://flatlake.app">FlateLake</a> installed. You
+also need to have front matter in your CommonMark/Markdown documents. No
+front matter, no API. I rely on front matter in my publication process
+for blog so FlatLake is a good fit. I only use a mimum of features in
+FlatLake. Here’s the configuration file I use.</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">global</span><span class="kw">:</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">outputs</span><span class="kw">:</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> </span><span class="st">&quot;list&quot;</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">collections</span><span class="kw">:</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">output_key</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;posts&quot;</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">page_size</span><span class="kw">:</span><span class="at"> </span><span class="dv">24</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">sort_key</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;datePublished&quot;</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">sort_direction</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;desc&quot;</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">list_elements</span><span class="kw">:</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="st">&quot;data&quot;</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="st">&quot;content&quot;</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">inputs</span><span class="kw">:</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">path</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;./blog&quot;</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">glob</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;**/*{md}&quot;</span></span></code></pre></div>
+<h2 id="generating-the-json-api">Generating the json api</h2>
+<p>Once you have FlatLake configured generating the JSON API is as
+simple as running the command</p>
+<pre class="shell"><code>flatlake</code></pre>
+<p>That’s it. It scans the directory named “blog” in the directory where
+I stage my website. The output goes to a directory called “api”. If you
+prefer a diffent path FlatLake has options to support that. See
+<code>flatlake --help</code> or the website <a
+href="https://flatlake.app/docs">FlatLake/docs</a>. The verbose and
+logging options are helpful in understanding what FlatLake is doing.</p>
+<h2 id="short-anatomy-of-rss-xml">Short anatomy of RSS XML</h2>
+<p>The RSS XML has two parts. A channel description and the items in the
+feed. The items map the data about your blog posts. The channel
+description isn’t directly available from the FlatLake generated data.
+The easy solution I’ve chosen is to describe the channel in a YAML.
+Here’s the example I use for my blog.</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">title</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Robert&#39;s Ramblings&quot;</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">description</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Robert&#39;s website and blog posts&quot;</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">link</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;https://rsdoiel.github.io&quot;</span></span></code></pre></div>
+<h2 id="json-api-to-rss">JSON API to RSS</h2>
+<p>In my publication process the next thing I do is used a
+Deno+TypeScript program to convert the JSON API into an RSS feed. I have
+one feed for my site contains recent posts. The path in the api tree I
+use it <code>api/posts/all/page-1.json</code>. Based on my configuration
+file this contains the most recent 24 posts sorted by descending
+publication date. At this point it’s just a matter of cross walking the
+content of “page-1.json” into an RSS XML feed file.</p>
+<p>Here’s a TypeScript module I knock together to test out the
+concept.</p>
+<pre><code>/**
+ * flatlakeToRSS2.ts translate a FlatLake JSON API document to RSS2 XML.
+ *  
+ *  Copyright (C) 2025  R. S. Doiel
+ * 
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see &lt;https://www.gnu.org/licenses/&gt;.
+ */
+// Define the structure of your input data
+export interface Post {
+  content: string;
+  data: {
+    abstract: string;
+    author: string;
+    dateCreated?: string;
+    dateModified?: string;
+    datePublished?: string;
+    keywords: string[];
+    pubDate?: string;
+    title: string;
+    url: string;
+  };
+}
+
+// Define the structure of the RSS feed
+export interface RSSFeed {
+  title: string;
+  description: string;
+  link: string;
+  language?: string;
+  copyright?: string;
+  managingEditor?: string;
+  webMaster?: string;
+  items: RSSItem[];
+}
+
+export interface RSSItem {
+  title: string;
+  description: string;
+  link: string;
+  pubDate: string;
+  author: string;
+  categories: string[];
+}
+
+// Function to convert JSON data to RSS feed with YAML configuration
+export function convertToRSS(
+  posts: Post[],
+  channelInfo: Partial&lt;RSSFeed&gt;,
+): RSSFeed {
+  const feed: RSSFeed = {
+    title: channelInfo.title || &quot;My Blog&quot;,
+    description: channelInfo.description || &quot;A collection of blog posts&quot;,
+    link: channelInfo.link || &quot;http://example.com&quot;,
+    language: channelInfo.language,
+    copyright: channelInfo.copyright,
+    managingEditor: channelInfo.managingEditor,
+    webMaster: channelInfo.webMaster,
+    items: [],
+  };
+
+  posts.forEach((post) =&gt; {
+    const item: RSSItem = {
+      title: post.data.title,
+      description: post.data.abstract,
+      link: `http://example.com/${post.data.url}`,
+      pubDate: new Date(
+        post.data.datePublished || post.data.pubDate || post.data.dateCreated ||
+          post.data.dateModified || Date.now(),
+      ).toUTCString(),
+      author: post.data.author,
+      categories: post.data.keywords,
+    };
+    feed.items.push(item);
+  });
+
+  return feed;
+}
+
+// Function to generate the RSS XML
+export function generateRSS(feed: RSSFeed): string {
+  const itemsXML = feed.items
+    .map(
+      (item) =&gt; `
+        &lt;item&gt;
+            &lt;title&gt;&lt;![CDATA[${item.title}]]&gt;&lt;/title&gt;
+            &lt;description&gt;&lt;![CDATA[${item.description}]]&gt;&lt;/description&gt;
+            &lt;link&gt;${item.link}&lt;/link&gt;
+            &lt;pubDate&gt;${item.pubDate}&lt;/pubDate&gt;
+            &lt;author&gt;${item.author}&lt;/author&gt;
+            ${
+        item.categories.map((category) =&gt; `&lt;category&gt;${category}&lt;/category&gt;`)
+          .join(&quot;&quot;)
+      }
+        &lt;/item&gt;
+    `,
+    )
+    .join(&quot;&quot;);
+
+  return `&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; ?&gt;
+&lt;rss version=&quot;2.0&quot;&gt;
+    &lt;channel&gt;
+        &lt;title&gt;&lt;![CDATA[${feed.title}]]&gt;&lt;/title&gt;
+        &lt;description&gt;&lt;![CDATA[${feed.description}]]&gt;&lt;/description&gt;
+        &lt;link&gt;${feed.link}&lt;/link&gt;
+        ${feed.language ? `&lt;language&gt;${feed.language}&lt;/language&gt;` : &quot;&quot;}
+        ${feed.copyright ? `&lt;copyright&gt;${feed.copyright}&lt;/copyright&gt;` : &quot;&quot;}
+        ${
+    feed.managingEditor
+      ? `&lt;managingEditor&gt;${feed.managingEditor}&lt;/managingEditor&gt;`
+      : &quot;&quot;
+  }
+        ${feed.webMaster ? `&lt;webMaster&gt;${feed.webMaster}&lt;/webMaster&gt;` : &quot;&quot;}
+        ${itemsXML}
+    &lt;/channel&gt;
+&lt;/rss&gt;`;
+}
+</code></pre>
+<h2 id="putting-it-all-together">Putting it all together</h2>
+<p>The demo program can be compiled with the follow.</p>
+<pre class="shell"><code>git clone https://github.com/rsdoiel/flatlakeToRSS2
+cd flatlakeToRSS2
+deno task build</code></pre>
+<p>The program in the <code>bin</code> directory can then be used to
+generate the RSS XML from your FlatLake API. Copy it to some place in
+your PATH.</p>
+<p>Now I go to my website staging directory. I can take the following
+steps to test RSS generation from FlatLake.</p>
+<pre class="shell"><code>cd $HOME/Sites/rsdoiel.github.io
+flatlake
+edit rss_channel.yaml # Create the YAML file above
+flatlakeToRSS2 rss_channel.yaml api/posts/all/page-1.json &gt;rss.xml</code></pre>
+<h2 id="lessons-learned">Lessons learned</h2>
+<p>There are some very good feed libraries out there like <a
+href="https://scripting.com">Dave Winer’s</a> <a
+href="https://github.com/scripting/reallysimple">ReallySimple</a>. That
+could save using format strings to render XML. It also has the advantage
+that is can be use to read feeds as well.</p>
+<p>Ideally I’d like the generation of RSS feeds to be in integrated into
+my <a href="/BlogIt">BlogIt</a> tool I am working on.</p>
+<p>This experiment showed that inspite of the limitted documentation of
+the FlatLake website that it’s worth exploring as an off the shelf open
+source solution. It might just earn a place along side <a
+href="https://pagefind.app">PageFind</a> and <a
+href="https://pandoc.org">Pandoc</a> as part of my regular web
+toolkit.</p>
+</section>
+</body>
+</html>
